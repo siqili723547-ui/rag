@@ -6,7 +6,8 @@
 - fixed eval 仍是默认回归基线
 - 当前仓库已经从 Obsidian 根目录下抽成独立项目
 - 回答链路默认只依赖仓库内同级脚本、索引和 eval case
-- 构建链路依赖外部语料，但现在通过显式参数接入
+- `build-index` 单测、CLI parity 和安装态 smoke 已切到仓库内 fixture
+- 手动重建真实索引仍依赖外部语料，但现在通过显式参数接入
 - 统一 CLI 的坏路径报错已收口成纯 CLI 错误，不再直接抛 Python traceback
 - 统一 CLI 的 `build-index` 默认写当前工作目录，不写安装目录
 
@@ -24,7 +25,7 @@
 1. 先读 `README.md`
 2. 跑统一单测：`py -3 -m unittest discover -p "test_*.py"`
 3. 跑默认回归：`.\run_round.ps1 "什么是命题" -Json`
-4. 如需重建索引，再显式传外部语料路径执行 `build_section_page_index.py`
+4. 如需手动重建真实索引，再显式传外部语料路径执行 `build_section_page_index.py`
 
 ## 不要动什么
 

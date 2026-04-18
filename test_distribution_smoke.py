@@ -9,6 +9,8 @@ import tempfile
 import unittest
 from pathlib import Path
 
+from build_index_test_support import build_index_fixture_args, load_expected_index_payload
+
 
 BACKEND_DIR = Path(__file__).resolve().parent
 QUERY = "什么是命题"
@@ -53,24 +55,6 @@ class DistributionSmokeTests(unittest.TestCase):
             path.relative_to(venv_dir).as_posix(): self.digest_file(path)
             for path in sorted(venv_dir.rglob("section_page_index*.json"))
         }
-
-    def make_fixture_corpus(self, temp_path: Path) -> tuple[Path, Path]:
-        corpus_root = temp_path / "fixture-corpus"
-        note_root = corpus_root / "notes"
-        page_index_path = corpus_root / "page-index.md"
-
-        note_root.mkdir(parents=True)
-        (note_root / "1.1.1 Sample.md").write_text(
-            "# 1.1.1 Sample\nBody text for the install smoke fixture.\n",
-            encoding="utf-8",
-        )
-        page_index_path.write_text(
-            "| Section | Book | PDF |\n"
-            "| --- | --- | --- |\n"
-            "| 1.1.1 Sample | 1-1 | 10-10 |\n",
-            encoding="utf-8",
-        )
-        return note_root, page_index_path
 
     def install_into_venv(
         self,
@@ -139,7 +123,6 @@ class DistributionSmokeTests(unittest.TestCase):
             temp_path = Path(temp_dir)
             run_dir = temp_path / "run"
             run_dir.mkdir()
-            note_root, page_index_path = self.make_fixture_corpus(temp_path)
             venv_dir, venv_python = self.install_into_venv(install_mode, temp_path)
             console_script = self.find_console_script(venv_dir)
 
@@ -172,19 +155,42 @@ class DistributionSmokeTests(unittest.TestCase):
                 "-m",
                 "discrete_math_rag",
                 "build-index",
-                "--note-root",
-                str(note_root),
-                "--page-index",
-                str(page_index_path),
+                *build_index_fixture_args(),
+                "--verify",
                 "--json",
                 cwd=run_dir,
             )
             installed_assets_after = self.snapshot_installed_index_assets(venv_dir)
 
+            expected_payload = load_expected_index_payload()
             build_payload = json.loads(build_completed.stdout)
             output_path = Path(str(build_payload["output_path"])).resolve()
             self.assertEqual(output_path, (run_dir / "section_page_index.json").resolve())
             self.assertTrue(output_path.exists())
+            output_payload = json.loads(output_path.read_text(encoding="utf-8"))
+            output_payload.pop("generated_at", None)
+            self.assertEqual(output_payload, expected_payload)
+            self.assertEqual(
+                build_payload["linked_sections_count"],
+                expected_payload["linked_sections_count"],
+            )
+            self.assertEqual(
+                build_payload["note_sections_count"],
+                expected_payload["note_sections_count"],
+            )
+            self.assertEqual(
+                build_payload["page_index_sections_count"],
+                expected_payload["page_index_sections_count"],
+            )
+            self.assertEqual(
+                build_payload["unmapped_note_sections_count"],
+                expected_payload["unmapped_note_sections_count"],
+            )
+            self.assertEqual(
+                build_payload["unmapped_page_index_sections_count"],
+                expected_payload["unmapped_page_index_sections_count"],
+            )
+            self.assertEqual(build_payload["verification"], expected_payload["sections"])
             self.assertEqual(installed_assets_before, installed_assets_after)
 
     def test_editable_install_supports_cli_smoke(self) -> None:

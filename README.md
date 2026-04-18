@@ -17,6 +17,7 @@
 - 一套统一 CLI：`answer`、`retrieve`、`eval`、`round`、`build-index`
 - 一套保留兼容的 PowerShell 入口，不破坏当前使用方式
 - 一套可执行的回归基线：单测 -> 默认回归 -> fixed eval
+- 一套基于仓库内 fixture 的 `build-index` 测试，不需要外部 Obsidian Vault
 - 一份接手文档：`ONBOARDING.md`
 
 ## 环境要求
@@ -105,6 +106,18 @@ python -m unittest test_cli.py
 python -m unittest test_distribution_smoke.py
 ```
 
+## `build-index` 测试 vs 真实索引重建
+
+日常单测和 `build-index` 相关测试现在都基于仓库内 fixture，可直接复现：
+
+- `test_build_section_page_index.py`
+- `test_cli.py` 里的 `build-index` CLI parity
+- `test_distribution_smoke.py` 里的安装态 `build-index` smoke
+
+这些测试统一复用 `test_fixtures/build_index/`，不需要外部 Obsidian Vault。
+
+只有在你要手动重建或覆盖仓库里的真实 `section_page_index.json` 时，才需要提供外部 Obsidian 语料。
+
 ## 重建 `section_page_index.json`
 
 运行时默认使用仓库里 checked-in 的 `section_page_index.json`。只有在你要从外部语料重新生成索引时，才需要提供 Obsidian 路径。
@@ -177,13 +190,9 @@ python -m unittest test_distribution_smoke.py
 
 ### `build-index` 找不到外部语料
 
+- 如果你只是跑 `test_build_section_page_index.py`、`test_cli.py` 或 `test_distribution_smoke.py`，先不要找 Obsidian Vault；这些测试已经走仓库内 fixture
 - 先确认 `--note-root` 和 `--page-index` 路径都存在
-- 如果你在跑重建相关测试，可以设置环境变量 `DISCRETE_MATH_RAG_SOURCE_ROOT`
-
-```powershell
-$env:DISCRETE_MATH_RAG_SOURCE_ROOT = "C:\path\to\Obsidian Vault"
-python -m unittest test_build_section_page_index.py
-```
+- 只有你在手动重建真实索引时，才需要额外提供 `--source-root`
 
 ### 默认回归过了，但 fixed eval 失败
 
