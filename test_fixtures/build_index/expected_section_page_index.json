@@ -1,0 +1,52 @@
+{
+  "note_root": "notes",
+  "page_index_path": "page_index.md",
+  "linked_sections_count": 3,
+  "note_sections_count": 4,
+  "page_index_sections_count": 4,
+  "unmapped_note_sections_count": 1,
+  "unmapped_page_index_sections_count": 1,
+  "sections": [
+    {
+      "section_id": "10.2.1",
+      "title": "Trees",
+      "indexed_title": "Trees and Forests",
+      "aliases": [],
+      "source_path": "notes/graphs/10.2.1 Trees.md",
+      "book_page_start": 201,
+      "book_page_end": 204,
+      "pdf_page_start": 301,
+      "pdf_page_end": 304,
+      "content": "A tree is a connected graph with no cycles."
+    },
+    {
+      "section_id": "3.2.1",
+      "title": "Proposition",
+      "indexed_title": "Propositions",
+      "aliases": [
+        "statement",
+        "declarative sentence"
+      ],
+      "source_path": "notes/logic/3.2.1 Proposition.md",
+      "book_page_start": 27,
+      "book_page_end": 29,
+      "pdf_page_start": 67,
+      "pdf_page_end": 69,
+      "content": "A proposition has a definite truth value."
+    },
+    {
+      "section_id": "3.2.2",
+      "title": "Compound Propositions",
+      "indexed_title": "Logical Equivalences",
+      "aliases": [
+        "compound statement"
+      ],
+      "source_path": "notes/logic/3.2.2 Compound Propositions.md",
+      "book_page_start": 29,
+      "book_page_end": 31,
+      "pdf_page_start": 70,
+      "pdf_page_end": 72,
+      "content": "Compound propositions combine simpler propositions with logical connectives."
+    }
+  ]
+}

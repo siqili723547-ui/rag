@@ -8,6 +8,8 @@ import tempfile
 import unittest
 from pathlib import Path
 
+from build_index_test_support import build_index_fixture_args, load_expected_index_payload
+
 
 BACKEND_DIR = Path(__file__).resolve().parent
 ANSWER_QUERY_PATH = BACKEND_DIR / "answer_query.py"
@@ -16,30 +18,6 @@ BUILD_INDEX_PATH = BACKEND_DIR / "build_section_page_index.py"
 RUN_EVAL_SUITE_PATH = BACKEND_DIR / "run_eval_suite.ps1"
 RUN_ROUND_PATH = BACKEND_DIR / "run_round.ps1"
 QUERY = "什么是命题"
-
-
-def resolve_source_root() -> Path | None:
-    env_path = os.environ.get("DISCRETE_MATH_RAG_SOURCE_ROOT")
-    candidates: list[Path] = []
-    if env_path:
-        candidates.append(Path(env_path))
-    candidates.extend(
-        [
-            BACKEND_DIR.parent / "Obsidian Vault",
-            Path.home() / "Documents" / "Obsidian Vault",
-        ]
-    )
-
-    for candidate in candidates:
-        if candidate.exists():
-            return candidate.resolve()
-    return None
-
-
-SOURCE_ROOT = resolve_source_root()
-BOOK_ROOT = SOURCE_ROOT / "math" / "离散数学及其应用" if SOURCE_ROOT else None
-NOTE_ROOT = BOOK_ROOT / "笔记" if BOOK_ROOT else None
-PAGE_INDEX_PATH = BOOK_ROOT / "页码索引.md" if BOOK_ROOT else None
 
 
 class CliParityTests(unittest.TestCase):
@@ -99,14 +77,6 @@ class CliParityTests(unittest.TestCase):
         path.unlink(missing_ok=True)
         return path
 
-    def require_external_corpus(self) -> None:
-        if SOURCE_ROOT is None or NOTE_ROOT is None or PAGE_INDEX_PATH is None:
-            self.skipTest("External corpus root not found.")
-        if not NOTE_ROOT.exists():
-            self.skipTest(f"External note root not found: {NOTE_ROOT}")
-        if not PAGE_INDEX_PATH.exists():
-            self.skipTest(f"External page index not found: {PAGE_INDEX_PATH}")
-
     def test_answer_cli_matches_legacy_script_json(self) -> None:
         legacy_payload = self.run_python_json(
             str(ANSWER_QUERY_PATH),
@@ -140,7 +110,6 @@ class CliParityTests(unittest.TestCase):
         self.assertEqual(cli_payload, legacy_payload)
 
     def test_build_index_cli_matches_legacy_script_output(self) -> None:
-        self.require_external_corpus()
         legacy_output_path = self.make_backend_temp_output()
         cli_output_path = self.make_backend_temp_output()
 
@@ -149,25 +118,16 @@ class CliParityTests(unittest.TestCase):
                 str(BUILD_INDEX_PATH),
                 "--output",
                 str(legacy_output_path),
-                "--note-root",
-                str(NOTE_ROOT),
-                "--page-index",
-                str(PAGE_INDEX_PATH),
-                "--source-root",
-                str(SOURCE_ROOT),
+                *build_index_fixture_args(),
             )
-            self.run_python_json(
+            cli_summary = self.run_python_json(
                 "-m",
                 "discrete_math_rag",
                 "build-index",
                 "--output",
                 str(cli_output_path),
-                "--note-root",
-                str(NOTE_ROOT),
-                "--page-index",
-                str(PAGE_INDEX_PATH),
-                "--source-root",
-                str(SOURCE_ROOT),
+                *build_index_fixture_args(),
+                "--verify",
                 "--json",
             )
 
@@ -177,7 +137,34 @@ class CliParityTests(unittest.TestCase):
             legacy_payload.pop("generated_at", None)
             cli_payload.pop("generated_at", None)
 
+            expected_payload = load_expected_index_payload()
             self.assertEqual(cli_payload, legacy_payload)
+            self.assertEqual(cli_payload, expected_payload)
+            self.assertEqual(cli_summary["output_path"], str(cli_output_path))
+            self.assertEqual(
+                cli_summary["linked_sections_count"],
+                expected_payload["linked_sections_count"],
+            )
+            self.assertEqual(
+                cli_summary["note_sections_count"],
+                expected_payload["note_sections_count"],
+            )
+            self.assertEqual(
+                cli_summary["page_index_sections_count"],
+                expected_payload["page_index_sections_count"],
+            )
+            self.assertEqual(
+                cli_summary["unmapped_note_sections_count"],
+                expected_payload["unmapped_note_sections_count"],
+            )
+            self.assertEqual(
+                cli_summary["unmapped_page_index_sections_count"],
+                expected_payload["unmapped_page_index_sections_count"],
+            )
+            self.assertEqual(
+                cli_summary["verification"],
+                expected_payload["sections"],
+            )
         finally:
             legacy_output_path.unlink(missing_ok=True)
             cli_output_path.unlink(missing_ok=True)
