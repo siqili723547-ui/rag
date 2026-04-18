@@ -346,7 +346,6 @@ def default_source_root(note_root: Path, page_index_path: Path) -> Path:
 
 
 def build_index_payload(
-    output_path: Path,
     note_root: Path,
     page_index_path: Path,
     source_root: Path | None,
@@ -376,8 +375,18 @@ def build_index_payload(
         ),
         "sections": records,
     }
-    write_output(output_path, payload)
     return payload
+
+
+def collect_build_index_verification_payload(
+    records: Sequence[dict[str, object]],
+    target_ids: Sequence[str],
+) -> list[dict[str, object]]:
+    record_by_id = {str(record["section_id"]): record for record in records}
+    missing = [target_id for target_id in target_ids if target_id not in record_by_id]
+    if missing:
+        raise SystemExit(f"missing target sections: {', '.join(missing)}")
+    return [record_by_id[target_id] for target_id in target_ids]
 
 
 def collect_queries(
@@ -700,6 +709,8 @@ def handle_answer(args: argparse.Namespace) -> int:
 def handle_retrieve(args: argparse.Namespace) -> int:
     if args.top_k <= 0:
         raise SystemExit("--top-k must be a positive integer")
+    if args.snippet_chars <= 0:
+        raise SystemExit("--snippet-chars must be a positive integer")
 
     index_path = resolve_existing_file(args.index, "index file")
     sections = retrieve_sections.load_sections(index_path)
@@ -774,6 +785,10 @@ def handle_eval(args: argparse.Namespace) -> int:
 def handle_round(args: argparse.Namespace) -> int:
     if args.skip_probe and args.skip_eval:
         raise SystemExit("At least one of --skip-probe / --skip-eval must be false.")
+    if args.top_k <= 0:
+        raise SystemExit("--top-k must be a positive integer")
+    if args.snippet_chars <= 0:
+        raise SystemExit("--snippet-chars must be a positive integer")
 
     queries = []
     if not args.skip_probe:
@@ -808,7 +823,6 @@ def handle_build_index(args: argparse.Namespace) -> int:
     output_path = resolve_build_output_path(args.output)
 
     payload = build_index_payload(
-        output_path=output_path,
         note_root=note_root,
         page_index_path=page_index_path,
         source_root=source_root,
@@ -818,12 +832,12 @@ def handle_build_index(args: argparse.Namespace) -> int:
     verification_payload = None
     if args.verify:
         target_ids = args.sections or DEFAULT_VERIFY_TARGETS
-        target_id_set = set(target_ids)
-        verification_payload = [
-            record
-            for record in payload["sections"]
-            if record["section_id"] in target_id_set
-        ]
+        verification_payload = collect_build_index_verification_payload(
+            payload["sections"],
+            target_ids,
+        )
+
+    write_output(output_path, payload)
 
     if args.json:
         summary = {

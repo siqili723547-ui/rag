@@ -33,17 +33,17 @@ python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 python -m pip install --upgrade pip
 python -m pip install -e .
-python -m unittest discover -p "test_*.py"
-python -m discrete_math_rag round "什么是命题" --json
-python -m discrete_math_rag eval --json
+python .\run_validation.py quick
+python .\run_validation.py round
+python .\run_validation.py eval
 ```
 
 如果你不想先装成 editable package，也可以直接用仓库内脚本：
 
 ```powershell
-py -3 -m unittest discover -p "test_*.py"
-.\run_round.ps1 "什么是命题" -Json
-.\run_eval_suite.ps1 -Json
+py -3 .\run_validation.py quick
+py -3 .\run_validation.py round
+py -3 .\run_validation.py eval
 ```
 
 ## 统一 CLI
@@ -73,25 +73,27 @@ PowerShell 入口会继续保留，当前 CI 也仍然用它们做回归。
 这些 smoke 都会在非仓库 `cwd` 下同时验证 `python -m discrete_math_rag`
 和 `discrete-math-rag`，并确认安装态 `build-index` 默认不会把输出写回
 venv / site-packages 一侧。
+本地如果想按职责分层跑验证，直接用 `python .\run_validation.py quick`、
+`python .\run_validation.py install-smoke` 和 `python .\run_validation.py full`。
 
 ## 推荐工作流
 
-### 1. 日常改动前先跑单测
+### 1. 日常改动前先跑快单测
 
 ```powershell
-python -m unittest discover -p "test_*.py"
+python .\run_validation.py quick
 ```
 
 ### 2. 改了入口、编排或文档后跑默认回归
 
 ```powershell
-python -m discrete_math_rag round "什么是命题" --json
+python .\run_validation.py round
 ```
 
 ### 3. 改了任何可能碰到检索边界的代码后跑 fixed eval
 
 ```powershell
-python -m discrete_math_rag eval --json
+python .\run_validation.py eval
 ```
 
 ### 4. 改了 CLI 或脚本契约后跑 CLI 等价性测试
@@ -103,7 +105,7 @@ python -m unittest test_cli.py
 ### 5. 改了打包、安装方式或 CI 后跑安装态 smoke
 
 ```powershell
-python -m unittest test_distribution_smoke.py
+python .\run_validation.py install-smoke
 ```
 
 ## `build-index` 测试 vs 真实索引重建
@@ -152,9 +154,9 @@ python -m discrete_math_rag build-index `
 推荐把下面三步当成默认验收顺序：
 
 ```powershell
-python -m unittest discover -p "test_*.py"
-python -m discrete_math_rag round "什么是命题" --json
-python -m discrete_math_rag eval --json
+python .\run_validation.py quick
+python .\run_validation.py round
+python .\run_validation.py eval
 ```
 
 如果你需要验证“新 CLI 没有偏离旧脚本契约”，再补一条：
@@ -166,7 +168,7 @@ python -m unittest test_cli.py
 如果你需要验证“editable / 非 editable / wheel 安装后还能直接跑统一 CLI”，再补一条：
 
 ```powershell
-python -m unittest test_distribution_smoke.py
+python .\run_validation.py install-smoke
 ```
 
 ## 常见排查
@@ -211,6 +213,7 @@ python -m unittest test_distribution_smoke.py
 - `answer_query.py`：最小回答闭环
 - `build_section_page_index.py`：索引构建入口
 - `_build_section_page_index_impl.py`：索引构建实现
+- `run_validation.py`：分层验证入口（quick / install-smoke / full）
 - `run_eval_suite.ps1`：固定评测 PowerShell 入口
 - `run_round.ps1`：默认回归 PowerShell 入口
 - `probe_queries.ps1`：并行 probe 的 PowerShell 入口
@@ -223,7 +226,7 @@ python -m unittest test_distribution_smoke.py
 仓库包含最小 CI：`.github/workflows/ci.yml`。
 
 - 运行环境：`windows-latest`
-- 验证顺序：单测（含 install-mode smoke） -> extra wheel CLI smoke -> 默认回归 -> fixed eval
+- 验证顺序：快单测 -> install-mode smoke -> extra wheel CLI smoke -> 默认回归 -> fixed eval
 - 目标：把当前“本地可跑”的 baseline 固化成“push / PR 可验证”的 baseline
 
 ## 相关文档

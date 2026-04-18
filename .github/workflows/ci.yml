@@ -23,9 +23,13 @@ jobs:
           python --version
           $PSVersionTable.PSVersion
 
-      - name: Run unit tests and install-mode smoke tests
+      - name: Run fast unit tests
         shell: powershell
-        run: python -m unittest discover -p "test_*.py"
+        run: python .\run_validation.py quick
+
+      - name: Run install-mode smoke tests
+        shell: powershell
+        run: python .\run_validation.py install-smoke
 
       - name: Run extra wheel CLI smoke test
         shell: powershell

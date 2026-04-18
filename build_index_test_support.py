@@ -43,3 +43,11 @@ def build_expected_verification_payload(section_ids: list[str]) -> list[dict[str
         }
         for section_id in section_ids
     ]
+
+
+def build_expected_verification_summary(section_ids: list[str]) -> list[dict[str, object]]:
+    records_by_id = {
+        record["section_id"]: record
+        for record in load_expected_index_payload()["sections"]
+    }
+    return [records_by_id[section_id] for section_id in section_ids]

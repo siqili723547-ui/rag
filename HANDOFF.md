@@ -16,14 +16,14 @@
 - 文档入口：`README.md`
 - 默认回归：`.\run_round.ps1`
 - 最小回答：`py -3 .\answer_query.py`
-- 统一单测：`py -3 -m unittest discover -p "test_*.py"`
+- 快单测：`py -3 .\run_validation.py quick`
 - 索引构建：`py -3 .\build_section_page_index.py --note-root ... --page-index ...`
 - CI：`.github/workflows/ci.yml`
 
 ## 恢复顺序
 
 1. 先读 `README.md`
-2. 跑统一单测：`py -3 -m unittest discover -p "test_*.py"`
+2. 跑快单测：`py -3 .\run_validation.py quick`
 3. 跑默认回归：`.\run_round.ps1 "什么是命题" -Json`
 4. 如需手动重建真实索引，再显式传外部语料路径执行 `build_section_page_index.py`
 
@@ -47,5 +47,6 @@
 
 - 当前 baseline 已补最小 CI，验证顺序与本地默认验收一致
 - CI 跑在 Windows 上，避免 `powershell` 调用契约和本地脚本环境分叉
-- `test_distribution_smoke.py` 已覆盖 editable / `pip install .` / wheel
+- `py -3 .\run_validation.py install-smoke` 会调用 `test_distribution_smoke.py`
+  并覆盖 editable / `pip install .` / wheel
   三种安装态 smoke

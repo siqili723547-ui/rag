@@ -9,7 +9,11 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from build_index_test_support import build_index_fixture_args, load_expected_index_payload
+from build_index_test_support import (
+    build_expected_verification_summary,
+    build_index_fixture_args,
+    load_expected_index_payload,
+)
 
 
 BACKEND_DIR = Path(__file__).resolve().parent
@@ -190,7 +194,10 @@ class DistributionSmokeTests(unittest.TestCase):
                 build_payload["unmapped_page_index_sections_count"],
                 expected_payload["unmapped_page_index_sections_count"],
             )
-            self.assertEqual(build_payload["verification"], expected_payload["sections"])
+            self.assertEqual(
+                build_payload["verification"],
+                build_expected_verification_summary(["3.2.1", "3.2.2", "10.2.1"]),
+            )
             self.assertEqual(installed_assets_before, installed_assets_after)
 
     def test_editable_install_supports_cli_smoke(self) -> None:
