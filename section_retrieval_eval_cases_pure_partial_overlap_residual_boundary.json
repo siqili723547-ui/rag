@@ -1,0 +1,31 @@
+{
+  "dataset_name": "section_retrieval_pure_partial_overlap_residual_boundary_v1",
+  "description": "pure partial-overlap residual 边界诊断集。只固定 query 入口与目标 Top1，供 --top-k 5 人工核验使用；用于把现有 mixed multi-char diagnostic 中仍属“目标概念直接命中标题或 alias，但与更长同主题标题发生直接 partial overlap 竞争”的 residual 单独拆出，不把低位合理竞争或 residual 噪声硬编码成机器断言。",
+  "boundary_scope": {
+    "mechanism": "pure partial-overlap residual：query 目标概念已直接命中目标小节标题或 alias，且竞争页也直接包含同一目标短语或其更长扩展形式；竞争主要来自显式短语 overlap，而不是 opening definition block 的桥接，也不是由共享 family token 主导的 concept-family competition。",
+    "in_scope_queries": [
+      "什么是生成树",
+      "什么是哈密顿图"
+    ],
+    "out_of_scope_queries": [
+      "什么是生成子图（opening-definition bridge：标题/alias 不直含目标概念，依赖 opening definition block 保护 Top1）",
+      "什么是命题变元（opening-definition bridge）",
+      "什么是有限格（opening-definition bridge）",
+      "什么是偏序集（opening-definition bridge）",
+      "什么是群的同态（concept-family competition：目标概念直接命中标题/alias，但竞争主要来自同态概念家族页面）",
+      "单字 residual，例如 什么是环",
+      "家族内低位竞争的细排位",
+      "其他依赖新增排序规则的 residual"
+    ]
+  },
+  "cases": [
+    {
+      "query": "什么是生成树",
+      "expected_section_id": "10.2.2"
+    },
+    {
+      "query": "什么是哈密顿图",
+      "expected_section_id": "11.3.1"
+    }
+  ]
+}

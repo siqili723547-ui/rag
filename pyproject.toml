@@ -1,0 +1,35 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "discrete-math-rag"
+version = "0.1.0"
+description = "Standalone discrete mathematics RAG backend with fixed retrieval regression coverage."
+readme = { file = "README.md", content-type = "text/markdown" }
+requires-python = ">=3.10"
+dependencies = []
+
+[project.scripts]
+discrete-math-rag = "discrete_math_rag.cli:main"
+
+[tool.setuptools]
+packages = ["discrete_math_rag"]
+py-modules = [
+  "answer_query",
+  "retrieve_sections",
+  "build_section_page_index",
+  "_build_section_page_index_impl",
+]
+
+[tool.setuptools.data-files]
+"" = [
+  "section_page_index.json",
+  "section_retrieval_eval_cases.json",
+  "section_retrieval_eval_cases_definition_content_head.json",
+  "section_retrieval_eval_cases_single_char_definition_boundary.json",
+  "section_retrieval_eval_cases_multi_char_partial_overlap_boundary.json",
+  "section_retrieval_eval_cases_opening_definition_bridge_boundary.json",
+  "section_retrieval_eval_cases_concept_family_competition_boundary.json",
+  "section_retrieval_eval_cases_pure_partial_overlap_residual_boundary.json",
+]

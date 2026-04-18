@@ -1,0 +1,26 @@
+{
+  "dataset_name": "section_retrieval_definition_content_head_v1",
+  "description": "补充验证：title 不含概念主词、alias 也不直含用户问法，但小节开头定义块已明确引入该概念。",
+  "cases": [
+    {
+      "query": "什么是命题变元",
+      "expected_section_id": "3.3.1"
+    },
+    {
+      "query": "什么是生成子图",
+      "expected_section_id": "10.2.2"
+    },
+    {
+      "query": "什么是互补对",
+      "expected_section_id": "3.5.1"
+    },
+    {
+      "query": "什么是有限格",
+      "expected_section_id": "15.2.1"
+    },
+    {
+      "query": "什么是偏序集",
+      "expected_section_id": "7.3.1"
+    }
+  ]
+}

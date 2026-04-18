@@ -1,0 +1,54 @@
+{
+  "dataset_name": "section_retrieval_single_char_definition_boundary_v1",
+  "description": "单字定义查询 residual 边界诊断集。只固定查询入口与目标小节，供 --top-k 5 的人工核验使用；不把低位合理竞争/残余噪声硬编码成机器断言。",
+  "cases": [
+    {
+      "query": "什么是环",
+      "expected_section_id": "14.2.1"
+    },
+    {
+      "query": "什么是群",
+      "expected_section_id": "13.3.1"
+    },
+    {
+      "query": "什么是树",
+      "expected_section_id": "10.2.1"
+    },
+    {
+      "query": "什么是生成树",
+      "expected_section_id": "10.2.2"
+    },
+    {
+      "query": "什么是生成子图",
+      "expected_section_id": "10.2.2"
+    },
+    {
+      "query": "什么是同态",
+      "expected_section_id": "12.5.1"
+    },
+    {
+      "query": "什么是群的同态",
+      "expected_section_id": "13.3.4"
+    },
+    {
+      "query": "什么是同构",
+      "expected_section_id": "12.5.1"
+    },
+    {
+      "query": "什么是哈密顿图",
+      "expected_section_id": "11.3.1"
+    },
+    {
+      "query": "什么是命题变元",
+      "expected_section_id": "3.3.1"
+    },
+    {
+      "query": "什么是有限格",
+      "expected_section_id": "15.2.1"
+    },
+    {
+      "query": "什么是偏序集",
+      "expected_section_id": "7.3.1"
+    }
+  ]
+}
