@@ -8,7 +8,13 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from build_index_test_support import build_index_fixture_args, load_expected_index_payload
+from build_index_test_support import (
+    PAGE_INDEX_PATH,
+    SOURCE_ROOT,
+    build_expected_verification_summary,
+    build_index_fixture_args,
+    load_expected_index_payload,
+)
 
 
 BACKEND_DIR = Path(__file__).resolve().parent
@@ -163,7 +169,7 @@ class CliParityTests(unittest.TestCase):
             )
             self.assertEqual(
                 cli_summary["verification"],
-                expected_payload["sections"],
+                build_expected_verification_summary(["3.2.1", "3.2.2", "10.2.1"]),
             )
         finally:
             legacy_output_path.unlink(missing_ok=True)
@@ -225,6 +231,126 @@ class CliParityTests(unittest.TestCase):
                 self.assertEqual(completed.stdout, "")
                 self.assertIn(expected_error, completed.stderr)
                 self.assertNotIn("Traceback", completed.stderr)
+
+    def test_invalid_numeric_args_are_plain_cli_messages(self) -> None:
+        cases = [
+            (
+                ("retrieve", QUERY, "--snippet-chars", "0"),
+                "--snippet-chars must be a positive integer",
+            ),
+            (
+                ("round", QUERY, "--top-k", "0", "--skip-eval"),
+                "--top-k must be a positive integer",
+            ),
+            (
+                ("round", QUERY, "--snippet-chars", "0", "--skip-eval"),
+                "--snippet-chars must be a positive integer",
+            ),
+        ]
+
+        for argv, expected_error in cases:
+            with self.subTest(argv=argv):
+                completed = self.run_python_command(
+                    "-m",
+                    "discrete_math_rag",
+                    *argv,
+                    check=False,
+                )
+                self.assertEqual(completed.returncode, 1)
+                self.assertEqual(completed.stdout, "")
+                self.assertIn(expected_error, completed.stderr)
+                self.assertNotIn("Traceback", completed.stderr)
+
+    def test_build_index_bad_path_errors_are_plain_cli_messages(self) -> None:
+        cases = [
+            (
+                (
+                    "build-index",
+                    "--note-root",
+                    "missing-note-root",
+                    "--page-index",
+                    str(PAGE_INDEX_PATH),
+                ),
+                "note root not found:",
+            ),
+            (
+                (
+                    "build-index",
+                    "--note-root",
+                    str(SOURCE_ROOT),
+                    "--page-index",
+                    "missing-page-index",
+                ),
+                "page index not found:",
+            ),
+        ]
+
+        for argv, expected_error in cases:
+            with self.subTest(argv=argv):
+                completed = self.run_python_command(
+                    "-m",
+                    "discrete_math_rag",
+                    *argv,
+                    check=False,
+                )
+                self.assertEqual(completed.returncode, 1)
+                self.assertEqual(completed.stdout, "")
+                self.assertIn(expected_error, completed.stderr)
+                self.assertNotIn("Traceback", completed.stderr)
+
+    def test_build_index_verify_missing_target_fails_before_writing_output(self) -> None:
+        for extra_args in ((), ("--json",)):
+            with self.subTest(extra_args=extra_args):
+                output_path = self.make_backend_temp_output()
+                try:
+                    completed = self.run_python_command(
+                        "-m",
+                        "discrete_math_rag",
+                        "build-index",
+                        "--output",
+                        str(output_path),
+                        *build_index_fixture_args(),
+                        "--verify",
+                        "--section",
+                        "999.9.9",
+                        *extra_args,
+                        check=False,
+                    )
+                finally:
+                    output_path.unlink(missing_ok=True)
+
+                self.assertEqual(completed.returncode, 1)
+                self.assertEqual(completed.stdout, "")
+                self.assertIn("missing target sections: 999.9.9", completed.stderr)
+                self.assertNotIn("Traceback", completed.stderr)
+                self.assertFalse(output_path.exists())
+
+    def test_build_index_json_verification_preserves_requested_section_order(self) -> None:
+        requested_sections = ["3.2.2", "10.2.1"]
+
+        output_path = self.make_backend_temp_output()
+        try:
+            summary = self.run_python_json(
+                "-m",
+                "discrete_math_rag",
+                "build-index",
+                "--output",
+                str(output_path),
+                *build_index_fixture_args(),
+                "--verify",
+                "--section",
+                requested_sections[0],
+                "--section",
+                requested_sections[1],
+                "--json",
+            )
+        finally:
+            output_path.unlink(missing_ok=True)
+
+        self.assertEqual(
+            [record["section_id"] for record in summary["verification"]],
+            requested_sections,
+        )
 
 
 if __name__ == "__main__":
