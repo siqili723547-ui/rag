@@ -1,0 +1,52 @@
+{
+  "dataset_name": "section_retrieval_multi_char_partial_overlap_boundary_v1",
+  "description": "多字定义查询 partial-overlap residual 边界诊断集。只固定 query 入口与目标 Top1，供 --top-k 5 人工核验使用；不把低位合理竞争或 residual 噪声硬编码成机器断言。",
+  "boundary_scope": {
+    "pure_partial_overlap_residual_queries": [
+      "什么是生成树",
+      "什么是哈密顿图"
+    ],
+    "protective_queries": [
+      "什么是生成子图",
+      "什么是命题变元",
+      "什么是有限格",
+      "什么是群的同态",
+      "什么是偏序集"
+    ],
+    "out_of_scope": [
+      "单字定义 residual，例如 什么是环",
+      "概念家族低位竞争的具体排序",
+      "依赖新增排序规则的其他 residual 形态"
+    ]
+  },
+  "cases": [
+    {
+      "query": "什么是生成树",
+      "expected_section_id": "10.2.2"
+    },
+    {
+      "query": "什么是生成子图",
+      "expected_section_id": "10.2.2"
+    },
+    {
+      "query": "什么是哈密顿图",
+      "expected_section_id": "11.3.1"
+    },
+    {
+      "query": "什么是命题变元",
+      "expected_section_id": "3.3.1"
+    },
+    {
+      "query": "什么是有限格",
+      "expected_section_id": "15.2.1"
+    },
+    {
+      "query": "什么是群的同态",
+      "expected_section_id": "13.3.4"
+    },
+    {
+      "query": "什么是偏序集",
+      "expected_section_id": "7.3.1"
+    }
+  ]
+}

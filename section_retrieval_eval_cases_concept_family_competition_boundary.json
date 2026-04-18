@@ -1,0 +1,27 @@
+{
+  "dataset_name": "section_retrieval_concept_family_competition_boundary_v1",
+  "description": "concept-family competition 保护边界诊断集。只固定 query 入口与目标 Top1，供 --top-k 5 人工核验使用；用于单独观察“目标概念直接命中标题/alias，但同概念家族页面仍会形成竞争”的保护边界，不把家族内低位合理竞争或 residual 噪声硬编码成机器断言。",
+  "boundary_scope": {
+    "mechanism": "concept-family competition protection：query 目标概念直接命中目标小节标题或 alias，但同一概念家族中的相邻页面共享强 family token（例如“同态”），因此需要单独观察目标页是否仍保持 Top1；本诊断不处理家族内低位竞争的细排位。",
+    "in_scope_queries": [
+      "什么是群的同态"
+    ],
+    "out_of_scope_queries": [
+      "什么是生成子图（opening-definition bridge）",
+      "什么是命题变元（opening-definition bridge）",
+      "什么是有限格（opening-definition bridge）",
+      "什么是偏序集（opening-definition bridge）",
+      "什么是生成树（pure partial-overlap residual）",
+      "什么是哈密顿图（pure partial-overlap residual）",
+      "单字 residual，例如 什么是环",
+      "家族内低位竞争的细排位",
+      "其他依赖新增排序规则的 residual"
+    ]
+  },
+  "cases": [
+    {
+      "query": "什么是群的同态",
+      "expected_section_id": "13.3.4"
+    }
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "dataset_name": "section_retrieval_opening_definition_bridge_boundary_v1",
+  "description": "opening-definition bridge 保护边界诊断集。只固定 query 入口与目标 Top1，供 --top-k 5 人工核验使用；用于单独观察“标题/alias 不直含目标概念，但 opening definition block 已经引入或定义该概念”的保护边界，不把概念家族竞争与低位合理竞争硬编码成机器断言。",
+  "boundary_scope": {
+    "mechanism": "opening-definition bridge：query 目标概念不直接落在标题/alias，但在小节开头定义块中已被引入或定义，应保护该小节成为 Top1。",
+    "in_scope_queries": [
+      "什么是生成子图",
+      "什么是命题变元",
+      "什么是有限格",
+      "什么是偏序集"
+    ],
+    "out_of_scope_queries": [
+      "什么是群的同态（更偏概念家族竞争保护；目标概念直接命中标题/alias，不属于 opening-definition bridge 边界）",
+      "单字 residual，例如 什么是环",
+      "家族内低位竞争与其他 residual 噪声"
+    ]
+  },
+  "cases": [
+    {
+      "query": "什么是生成子图",
+      "expected_section_id": "10.2.2"
+    },
+    {
+      "query": "什么是命题变元",
+      "expected_section_id": "3.3.1"
+    },
+    {
+      "query": "什么是有限格",
+      "expected_section_id": "15.2.1"
+    },
+    {
+      "query": "什么是偏序集",
+      "expected_section_id": "7.3.1"
+    }
+  ]
+}

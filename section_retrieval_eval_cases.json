@@ -1,0 +1,50 @@
+{
+  "dataset_name": "section_retrieval_minimal_v1",
+  "description": "最小固定评测集，仅用于当前离散数学小节级检索回归验证。",
+  "cases": [
+    {
+      "query": "什么是命题",
+      "expected_section_id": "3.2.1"
+    },
+    {
+      "query": "什么是量词",
+      "expected_section_id": "4.2.2"
+    },
+    {
+      "query": "什么是关系",
+      "expected_section_id": "6.2.2"
+    },
+    {
+      "query": "什么是等价关系",
+      "expected_section_id": "7.2.1"
+    },
+    {
+      "query": "什么是函数",
+      "expected_section_id": "8.2.1"
+    },
+    {
+      "query": "什么是树",
+      "expected_section_id": "10.2.1"
+    },
+    {
+      "query": "什么是生成树",
+      "expected_section_id": "10.2.2"
+    },
+    {
+      "query": "什么是欧拉图",
+      "expected_section_id": "11.2.1"
+    },
+    {
+      "query": "什么是一笔画问题",
+      "expected_section_id": "11.2.1"
+    },
+    {
+      "query": "什么是哈密顿图",
+      "expected_section_id": "11.3.1"
+    },
+    {
+      "query": "什么是哈密顿回路",
+      "expected_section_id": "11.3.1"
+    }
+  ]
+}

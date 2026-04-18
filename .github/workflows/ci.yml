@@ -1,0 +1,71 @@
+name: ci
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  verify:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Show tool versions
+        shell: powershell
+        run: |
+          python --version
+          $PSVersionTable.PSVersion
+
+      - name: Run unit tests and install-mode smoke tests
+        shell: powershell
+        run: python -m unittest discover -p "test_*.py"
+
+      - name: Run extra wheel CLI smoke test
+        shell: powershell
+        run: |
+          $distDir = Join-Path $PWD "dist"
+          $venvDir = Join-Path $PWD ".pkg-smoke"
+          $smokeDir = Join-Path $env:RUNNER_TEMP "discrete-math-rag-cli-smoke"
+
+          if (Test-Path -LiteralPath $distDir) {
+            Remove-Item -LiteralPath $distDir -Recurse -Force
+          }
+          if (Test-Path -LiteralPath $venvDir) {
+            Remove-Item -LiteralPath $venvDir -Recurse -Force
+          }
+
+          python -m pip wheel . --no-deps -w $distDir
+          python -m venv $venvDir
+
+          $venvPython = Join-Path $venvDir "Scripts\\python.exe"
+          & $venvPython -m pip install --no-deps (Get-ChildItem -LiteralPath $distDir -Filter *.whl | Select-Object -First 1).FullName
+
+          $venvCli = Join-Path $venvDir "Scripts\\discrete-math-rag.exe"
+          if (-not (Test-Path -LiteralPath $venvCli)) {
+            $venvCli = Join-Path $venvDir "Scripts\\discrete-math-rag.cmd"
+          }
+
+          New-Item -ItemType Directory -Force -Path $smokeDir | Out-Null
+          Push-Location $smokeDir
+          try {
+            & $venvPython -m discrete_math_rag answer "什么是命题" --json | Out-Null
+            & $venvCli eval --json | Out-Null
+          }
+          finally {
+            Pop-Location
+          }
+
+      - name: Run default round
+        shell: powershell
+        run: .\run_round.ps1 "什么是命题" -Python python -Json | Out-Null
+
+      - name: Run fixed eval
+        shell: powershell
+        run: .\run_eval_suite.ps1 -Python python -Json | Out-Null
